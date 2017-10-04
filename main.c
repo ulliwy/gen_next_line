@@ -18,11 +18,13 @@
 int		main (int argc, char **argv)
 {
 	int		fd;
-	char	**line;
+	char	*line;
 
 	if (argc != 2)
 		return (0);
 	fd = open(argv[1], O_RDONLY);
-	printf("%d\n", get_next_line(fd, line));
-	printf("%s\n", *line);
+	printf("return: %d\n", get_next_line(fd, &line));
+	printf("------\n");
+	printf("return: %d\n", get_next_line(fd, &line));
+	printf("line: \"%s\"\n", line);
 }
