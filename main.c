@@ -6,7 +6,7 @@
 /*   By: iprokofy <iprokofy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/03 14:33:16 by iprokofy          #+#    #+#             */
-/*   Updated: 2017/10/04 16:51:14 by iprokofy         ###   ########.fr       */
+/*   Updated: 2017/10/05 11:00:23 by iprokofy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,16 +40,13 @@ int		main (int argc, char **argv)
 {
 	int		fd1;
 	//int		fd2;
-	//char	*line;
+	char	*line;
 
 	if (argc != 2)
 		return (0);
 	fd1 = open(argv[1], O_RDONLY);
 	//fd2 = open("test2", O_RDONLY);
 	//close(fd);
-	/*printf("result return: %d\n", get_next_line(fd1, &line));
-	printf("result line: \"%s\"\n", line);
-	printf("-------------------------------\n");
 	printf("result return: %d\n", get_next_line(fd1, &line));
 	printf("result line: \"%s\"\n", line);
 	printf("-------------------------------\n");
@@ -61,7 +58,10 @@ int		main (int argc, char **argv)
 	printf("-------------------------------\n");
 	printf("result return: %d\n", get_next_line(fd1, &line));
 	printf("result line: \"%s\"\n", line);
-	close(fd1);*/
+	printf("-------------------------------\n");
+	printf("result return: %d\n", get_next_line(fd1, &line));
+	printf("result line: \"%s\"\n", line);
+	close(fd1);
 	//close(fd2);
 
 	simple_string();
