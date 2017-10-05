@@ -6,7 +6,7 @@
 /*   By: iprokofy <iprokofy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/03 14:24:11 by iprokofy          #+#    #+#             */
-/*   Updated: 2017/10/05 11:50:45 by iprokofy         ###   ########.fr       */
+/*   Updated: 2017/10/05 16:05:20 by iprokofy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,18 +114,21 @@ int		get_next_line(const int fd, char **line)
 	int			len;
 	int			found;
 	int			ret;
+	int			rd;
 
 	if (fd < 0 || !line)
 		return (-1);
+	rd = 0;
 	*line = NULL;
 	found = get_from_buff(&buffer, fd, &len, line);
 	while (!found)
 	{
-		ret = read(fd, buffer[fd % FDN], BUFF_SIZE);
+		if ((ret = read(fd, buffer[fd % FDN], BUFF_SIZE)))
+			rd = 1;
 		buffer[fd % FDN][ret] = '\0';
 		if (len && ret < BUFF_SIZE)
 			found = 1;
-		if (!len && !ret)
+		if (!len && !ret && !rd)
 			return (0);
 		if (ret == -1)
 			return (-1);
