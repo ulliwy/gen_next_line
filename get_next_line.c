@@ -13,112 +13,134 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
+int		get_buf_param(char *buffer, int *nl)
+{
+	int		count;
+	int 	found;
+
+	count = 0;
+	found = 0;
+	while (*buffer)
+	{
+		count++;
+		if (!found)
+		{
+			if (*buffer == '\n')
+				found = 1;
+			else
+				(*nl)++;
+		}
+		buffer++;
+	}
+	(*nl)++;
+	if (!found)
+		*nl = -1;
+	return (count);
+}
+
 int		get_next_line(const int fd, char **line)
 {
-	static char	buffer[BUFF_SIZE];
-	char		*nl;
+	static char	buffer[100][BUFF_SIZE + 1];
+	int			nl;
 	int			len;
-
-	int			endln;
-	int			pos;
-	int			ret;
+	int			size;
+	int			nl2;
+	int			found;
 	char		*temp;
 	char		*part;
-	int			finish;
+	int			ret;
 
 	if (fd < 0 || !line)
 		return (-1);
-	finish = 0;
-	endln = 0;
-	len = ft_strlen(buffer);
+
+	nl = -1;
+	*line = NULL;	
+	len = get_buf_param(buffer[fd % 100], &nl);
+	//printf("begin buffer: \"%s\"\n", buffer);
+	//printf("len: %d, nl: %d\n", len, nl);
+	found = 0;
 	if (len)
 	{
-		if ((nl = ft_strchr(buffer, '\n')))
+		if (nl != -1)
 		{
-			if (b)
-		}
-
-	}
-
-	if (is_buff)
-	{
-		while (end < BUFF_SIZE)
-		{
-			if (buffer[end] == '\n')
-			{
-				endln = 1;
-				break;
-			}
-			if (buffer[end] == 0)
-				break;
-			end++;
-		}
-	}
-	if (is_buff)
-		*line = ft_strsub(buffer, start, end - start);
-	else
-	{
-		*line = (char *)malloc(end - start + 1);
-		line[0][0] = '\0';
-	}
-	if (is_buff)
-	{
-		if (end == BUFF_SIZE)
-		{
-			end = 0;
-			start = 0;
-			is_buff = 0;
-			ft_bzero(buffer, BUFF_SIZE);
+			*line = ft_strsub(buffer[fd % 100], 0, nl);
+			ft_memcpy(buffer[fd % 100], buffer[fd % 100] + nl + 1, len - nl);
+			buffer[fd % 100][len - nl - 1] = '\0';
+			//printf("buffer22: \"%s\"\n", buffer);
+			found = 1;
 		}
 		else
 		{
-			end++;
-			start = end;
+			*line = ft_strsub(buffer[fd % 100], 0, len);
+			//printf("line2: %s\n", *line);
+			buffer[fd % 100][0] = '\0';
+			//printf("buffer2: \"%s\"\n", buffer);
 		}
 	}
-	while (!endln && !finish)
+	nl2 = -1;
+	while (!found)
 	{
-		ret = read(fd, buffer, BUFF_SIZE);
-		if (ret == -1)
+		ret = read(fd, buffer[fd % 100], BUFF_SIZE);
+		buffer[fd % 100][ret] = '\0';
+		//printf("buffer: %s\n", buffer);
+		if (len && ret < BUFF_SIZE)
+			found = 1;
+		if (!len && !ret)
 		{
-			free(*line);
+			//printf("this!!!!!!!\n");
+			return (0);
+		}
+		//printf("ret: %d\n", ret);
+		if (ret == -1)
+		{	
 			return (-1);
 		}
-		if (ret < BUFF_SIZE)
-			finish = 1;
-		pos = 0;
-		while (pos < ret)
+		size = get_buf_param(buffer[fd % 100], &nl2);
+		//printf("size: %d, nl2: %d\n", size, nl2);
+		if (nl2 != -1)
 		{
-			if (buffer[pos] == '\n')
+			//printf("here!!!!\n");
+			part = ft_strsub(buffer[fd % 100], 0, nl2);
+			//printf("part: \"%s\"\n", part);
+			//printf("*line: \"%s\"\n", *line);
+			if (!(*line))
+				*line = part;
+			else
 			{
-				endln = 1;
-				break;
+				temp = ft_strjoin(*line, part);
+				//printf("temp: \"%s\"\n", temp);
+				free(*line);
+				free(part);
+				*line = temp;
 			}
-			pos++;
-		}
-		part = ft_strsub(buffer, 0, pos);
-		temp = (char *)malloc(ft_strlen(*line) + pos + 1);
-		temp = ft_strjoin(*line, part);
-		free(part);
-		free(*line);
-		*line = (char *)malloc(ft_strlen(temp) + 1);
-		*line = ft_strcpy(*line, temp);
-		free(temp);
-		if (pos == ret)
-		{
-			start = 0;
-			end = start;
-			is_buff = 0;
-			ft_bzero(buffer, BUFF_SIZE);
+			ft_memcpy(buffer[fd % 100], buffer[fd % 100] + nl2 + 1, size - nl2);
+			buffer[fd % 100][size - nl2] = '\0';
+			//printf("buffer4: %s\n", buffer);
+			found = 1;
 		}
 		else
 		{
-			start = pos + 1;
-			end = start;
-			is_buff = 1;
+			//printf("here!\n");
+			//printf("*line: %s\n", *line);
+			part = ft_strsub(buffer[fd % 100], 0, size);
+			//printf("part: %s\n", part);
+			if (!(*line))
+				*line = part;
+			else
+			{
+				temp = ft_strjoin(*line, part);
+				//printf("temp: \"%s\"\n", temp);
+				free(*line);
+				free(part);
+				*line = temp;
+			}
+			//printf("line3 %s\n", *line);
+			buffer[fd % 100][0] = '\0';
+			if (size < BUFF_SIZE)
+				found = 1;
+			//printf("buffer3: \"%s\"\n", buffer);
 		}
+		//printf("......\n");
 	}
-	if (!ft_strlen(*line) && buffer[end] == 0 && !endln)
-		return (0);
 	return (1);
 }

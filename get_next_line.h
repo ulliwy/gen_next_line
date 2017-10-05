@@ -16,7 +16,7 @@
 # include <stdlib.h>
 # include "libft/libft.h"
 
-# define BUFF_SIZE 10
+# define BUFF_SIZE 20
 # define EOF (-1)
 
 static int	is_buff = 0;
